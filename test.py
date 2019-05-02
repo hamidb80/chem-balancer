@@ -1,5 +1,5 @@
 import pytest
-import app
+from app import Balancer
 
 inps = [
     "H2 + O2 => H2O",
@@ -7,7 +7,6 @@ inps = [
     "C5H12 + O2 => CO2 + H2O",
     "Al + Fe2O3 => Al2O3 + Fe",
 ]
-outs = []
 expected_outs = [
     "2H2 + O2 => 2H2O",
     "Br2 + H2 => 2BrH",
@@ -16,23 +15,12 @@ expected_outs = [
 ]
 
 
-def virtual_input(txt=''):
-    return inps.pop()
-
-
-def virtual_print(out):
-    print(out, '--')
-    return outs.append(out)
-
-
-app.input = virtual_input
-app.print = virtual_print
-
-
 def test_unit():
-    for i in inps:
-        print(i)
-        app.main()
+    outs = []
+    
+    for inp in inps:
+        res = Balancer(inp).balance()
+        outs.append(res)
 
     assert outs == expected_outs
 
