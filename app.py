@@ -1,4 +1,5 @@
 import re
+from termcolor import cprint
 
 class Balancer:
     def __init__(self, react_formula):
@@ -8,7 +9,7 @@ class Balancer:
         # splitter index for k var
         self.splitter_i = 0
 
-        self.react = react_formula.replace('+', ' ').split('=>')
+        self.react = react_formula
         self.dic_react = []
 
         self.atoms_set = set()
@@ -16,7 +17,34 @@ class Balancer:
         self.is_done = False
         self.answer = ''
 
+    def react_formula_validation(self, react_formula: str):
+        if ('=>' not in react_formula) or ('+' not in react_formula):
+            return False
+
+        molecules = react_formula.replace('+', '').replace('=>', '').split()
+
+        for molecule in molecules:
+            # valid characters
+            m_match = re.match(r'([[A-Za-z0-9])+', molecule)
+
+            if m_match[0] != molecule:
+                return False
+
+            sub_k_list = re.findall(r"[A-Z][a-z]?([0-9]+)", molecule)
+            for sub_k in sub_k_list:
+                if int(sub_k) == 0:
+                    return False
+
+        return True
+
     def balance(self):
+        validation = self.react_formula_validation(self.react)
+        
+        if not validation:
+            cprint("[Syntax Error]: the react formula is not correct", 'white', 'on_red')
+            return 
+
+        self.react = self.react.replace('+', ' ').split('=>')
         self.react = [side.split() for side in self.react]
 
         for side in self.react:
@@ -44,8 +72,8 @@ class Balancer:
         self.k = [1] * len(self.react[0] + self.react[1])
         self.splitter_i = len(self.react[0])
 
-        res = self.looper()
-        return res
+        self.looper()
+        return self.answer
 
     def looper(self, n=0):
         for i in range(self.max_k):
@@ -55,12 +83,11 @@ class Balancer:
             else:
                 if self.check_valid():
                     self.answer = self.get_answer()
-                    return self.answer
-
-            self.k[n] += 1
 
             if self.answer:
-                return self.answer
+                return
+
+            self.k[n] += 1
 
         self.k[n] = 1
 

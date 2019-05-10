@@ -17,7 +17,7 @@ expected_outs = [
 
 def test_unit():
     outs = []
-    
+
     for inp in inps:
         res = Balancer(inp).balance()
         outs.append(res)
