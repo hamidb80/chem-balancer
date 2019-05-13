@@ -1,15 +1,16 @@
 import re
 from termcolor import cprint
 
+
 class Balancer:
-    def __init__(self, react_formula):
+    def __init__(self, react_formula: str):
         self.max_k = 50
 
         self.k = []
         # splitter index for k var
         self.splitter_i = 0
 
-        self.react = react_formula
+        self.react = self.init_react(react_formula)
         self.dic_react = []
 
         self.atoms_set = set()
@@ -18,18 +19,19 @@ class Balancer:
         self.answer = ''
 
     def react_formula_validation(self, react_formula: str):
-        if ('=>' not in react_formula) or ('+' not in react_formula):
+        if '=>' not in react_formula:
             return False
 
         molecules = react_formula.replace('+', '').replace('=>', '').split()
 
         for molecule in molecules:
-            # valid characters
+            # check there is no invalid characters
             m_match = re.match(r'([[A-Za-z0-9])+', molecule)
 
             if m_match[0] != molecule:
                 return False
 
+            # check all sub k in molecules not equal to 0
             sub_k_list = re.findall(r"[A-Z][a-z]?([0-9]+)", molecule)
             for sub_k in sub_k_list:
                 if int(sub_k) == 0:
@@ -37,16 +39,22 @@ class Balancer:
 
         return True
 
-    def balance(self):
-        validation = self.react_formula_validation(self.react)
-        
+    def init_react(self, react_formula: str):
+        validation = self.react_formula_validation(react_formula)
+
         if not validation:
-            cprint("[Syntax Error]: the react formula is not correct", 'white', 'on_red')
-            return 
+            cprint("[Syntax Error]: the react formula is not correct",
+                   'white', 'on_red')
+            return
 
-        self.react = self.react.replace('+', ' ').split('=>')
-        self.react = [side.split() for side in self.react]
+        react = react_formula.replace('+', ' ').split('=>')
+        react = [side.split() for side in react]
 
+        return react
+
+    def balance(self):
+
+        # convert string molecules to dict in dic_react : H2O -> {H:2, O:1}
         for side in self.react:
             molecules = []
 
@@ -81,7 +89,7 @@ class Balancer:
                 self.looper(n + 1)
 
             else:
-                if self.check_valid():
+                if self.is_balanced():
                     self.answer = self.get_answer()
 
             if self.answer:
@@ -91,7 +99,7 @@ class Balancer:
 
         self.k[n] = 1
 
-    def check_valid(self):
+    def is_balanced(self):
         splitted_k = [self.k[:self.splitter_i], self.k[self.splitter_i:]]
 
         for atom in self.atoms_set:
