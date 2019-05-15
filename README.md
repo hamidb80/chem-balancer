@@ -1,5 +1,2 @@
-# chemical balancer
-
-
-# new changes: 
-edit example
+# Chemical balancer:
+It can balance many chemical reacts with guess & try method.

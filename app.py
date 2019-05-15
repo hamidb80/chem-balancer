@@ -10,8 +10,8 @@ class Balancer:
         # splitter index for k var
         self.splitter_i = None
 
-        self.react = self.init_react_formula(react_formula)
-        self.react_dict = []
+        self.original_react = self.init_react_formula(react_formula)
+        self.custom_react = []
 
         self.atoms_set = set()
 
@@ -52,7 +52,7 @@ class Balancer:
     def init_react_dict(self):
 
         # convert string molecules to dict in react_dict : H2O -> {H:2, O:1}
-        for side in self.react:
+        for side in self.original_react:
             molecules = []
 
             for molecule in side:
@@ -71,14 +71,14 @@ class Balancer:
 
                 molecules.append(molecule_dict)
 
-            self.react_dict.append(molecules)
+            self.custom_react.append(molecules)
 
     def balance(self):
         self.init_react_dict()
 
         # init k
-        self.k = [1] * len(self.react[0] + self.react[1])
-        self.splitter_i = len(self.react[0])
+        self.k = [1] * len(self.original_react[0] + self.original_react[1])
+        self.splitter_i = len(self.original_react[0])
 
         res = self.looper()
         return self.get_answer() if res else 'I cant balance it!'
@@ -104,8 +104,8 @@ class Balancer:
         for atom in self.atoms_set:
             res = [0, 0]
 
-            for side_i in range(len(self.react_dict)):
-                for molecule_i, molecule in enumerate(self.react_dict[side_i]):
+            for side_i in range(len(self.custom_react)):
+                for molecule_i, molecule in enumerate(self.custom_react[side_i]):
 
                     atom_number = molecule.get(atom)
                     if atom_number:
@@ -122,7 +122,7 @@ class Balancer:
 
         formula = [[], []]
 
-        for side_i, side in enumerate(self.react):
+        for side_i, side in enumerate(self.original_react):
             for molecule_i, molecule in enumerate(side):
 
                 current_k = splitted_k[side_i][molecule_i]
