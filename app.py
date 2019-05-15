@@ -3,20 +3,17 @@ from termcolor import cprint
 
 
 class Balancer:
-    def __init__(self, react_formula: str):
-        self.max_k = 50
+    def __init__(self, react_formula: str, max_k=50):
+        self.max_k = max_k
 
         self.k = []
         # splitter index for k var
-        self.splitter_i = 0
+        self.splitter_i = None
 
-        self.react = self.init_react(react_formula)
-        self.dic_react = []
+        self.react = self.init_react_formula(react_formula)
+        self.react_dict = []
 
         self.atoms_set = set()
-
-        self.is_done = False
-        self.answer = ''
 
     def react_formula_validation(self, react_formula: str):
         if '=>' not in react_formula:
@@ -39,28 +36,28 @@ class Balancer:
 
         return True
 
-    def init_react(self, react_formula: str):
+    def init_react_formula(self, react_formula: str):
         validation = self.react_formula_validation(react_formula)
 
         if not validation:
             cprint("[Syntax Error]: the react formula is not correct",
                    'white', 'on_red')
-            return
+            return 'Error'
 
         react = react_formula.replace('+', ' ').split('=>')
         react = [side.split() for side in react]
 
         return react
 
-    def balance(self):
+    def init_react_dict(self):
 
-        # convert string molecules to dict in dic_react : H2O -> {H:2, O:1}
+        # convert string molecules to dict in react_dict : H2O -> {H:2, O:1}
         for side in self.react:
             molecules = []
 
             for molecule in side:
+                molecule_dict = {}
                 atoms = re.findall(r'[A-Z][a-z]?[0-9]*', molecule)
-                atoms_dic = {}
 
                 for atom in atoms:
                     name = re.search(r'[A-Z][a-z]?', atom)[0]
@@ -70,30 +67,32 @@ class Balancer:
                     number = re.search(r'[0-9]+', atom)
                     number = int(number[0]) if number else 1
 
-                    atoms_dic[name] = number
+                    molecule_dict[name] = number
 
-                molecules.append(atoms_dic)
+                molecules.append(molecule_dict)
 
-            self.dic_react.append(molecules)
+            self.react_dict.append(molecules)
+
+    def balance(self):
+        self.init_react_dict()
 
         # init k
         self.k = [1] * len(self.react[0] + self.react[1])
         self.splitter_i = len(self.react[0])
 
-        self.looper()
-        return self.answer
+        res = self.looper()
+        return self.get_answer() if res else 'I cant balance it!'
 
     def looper(self, n=0):
         for i in range(self.max_k):
             if n != len(self.k) - 1:
-                self.looper(n + 1)
+                res = self.looper(n + 1)
 
-            else:
-                if self.is_balanced():
-                    self.answer = self.get_answer()
+                if res:
+                    return True
 
-            if self.answer:
-                return
+            elif self.is_balanced():
+                return True
 
             self.k[n] += 1
 
@@ -105,8 +104,8 @@ class Balancer:
         for atom in self.atoms_set:
             res = [0, 0]
 
-            for side_i in range(len(self.dic_react)):
-                for molecule_i, molecule in enumerate(self.dic_react[side_i]):
+            for side_i in range(len(self.react_dict)):
+                for molecule_i, molecule in enumerate(self.react_dict[side_i]):
 
                     atom_number = molecule.get(atom)
                     if atom_number:
