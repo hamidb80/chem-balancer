@@ -3,7 +3,7 @@ from termcolor import cprint
 
 
 class Balancer:
-    def __init__(self, react_formula: str, max_k=50):
+    def __init__(self, react_formula: str, max_k=20):
         self.max_k = max_k
 
         self.k = []
@@ -15,6 +15,10 @@ class Balancer:
 
         self.atoms_set = set()
 
+    @property
+    def splitted_k(self):
+        return [self.k[:self.splitter_i], self.k[self.splitter_i:]]
+
     def react_formula_validation(self, react_formula: str):
         if '=>' not in react_formula:
             return False
@@ -23,9 +27,9 @@ class Balancer:
 
         for molecule in molecules:
             # check there is no invalid characters
-            m_match = re.match(r'([[A-Za-z0-9])+', molecule)
+            molecule_match = re.match(r'([[A-Za-z0-9])+$', molecule)
 
-            if m_match[0] != molecule:
+            if molecule_match[0] != molecule:
                 return False
 
             # check all sub k in molecules not equal to 0
@@ -49,7 +53,7 @@ class Balancer:
 
         return react
 
-    def init_react_dict(self):
+    def init_custom_react(self):
 
         # convert string molecules to dict in react_dict : H2O -> {H:2, O:1}
         for side in self.original_react:
@@ -74,7 +78,7 @@ class Balancer:
             self.custom_react.append(molecules)
 
     def balance(self):
-        self.init_react_dict()
+        self.init_custom_react()
 
         # init k
         self.k = [1] * len(self.original_react[0] + self.original_react[1])
@@ -99,7 +103,7 @@ class Balancer:
         self.k[n] = 1
 
     def is_balanced(self):
-        splitted_k = [self.k[:self.splitter_i], self.k[self.splitter_i:]]
+        splitted_k = self.splitted_k
 
         for atom in self.atoms_set:
             res = [0, 0]
@@ -118,7 +122,7 @@ class Balancer:
         return True
 
     def get_answer(self):
-        splitted_k = [self.k[:self.splitter_i], self.k[self.splitter_i:]]
+        splitted_k = self.splitted_k
 
         formula = [[], []]
 
