@@ -1,5 +1,6 @@
 import re
-from termcolor import cprint
+
+# TODO: add support for molecules that have (): Cu(NO3)2
 
 
 class Balancer:
@@ -15,10 +16,15 @@ class Balancer:
 
         self.atoms_set = set()
 
+    # According to the react, the k array splits
     @property
     def splitted_k(self):
         return [self.k[:self.splitter_i], self.k[self.splitter_i:]]
 
+    # checks these items:
+    # - the react should have '=>'
+    # - invalid character checking
+    # - there are not any sub K that equal to 0
     def react_formula_validation(self, react_formula: str):
         if '=>' not in react_formula:
             return False
@@ -40,12 +46,12 @@ class Balancer:
 
         return True
 
+    # converts "H2 + O2 => H2O" to [['H2', 'O2'], ['H2O']]
     def init_react_formula(self, react_formula: str):
         validation = self.react_formula_validation(react_formula)
 
         if not validation:
-            cprint("[Syntax Error]: the react formula is not correct",
-                   'white', 'on_red')
+            print("[Syntax Error]: the react formula is not correct")
             return 'Error'
 
         react = react_formula.replace('+', ' ').split('=>')
@@ -53,9 +59,8 @@ class Balancer:
 
         return react
 
+    # convert string molecules to dict in react_dict : H2O -> {H:2, O:1}
     def init_custom_react(self):
-
-        # convert string molecules to dict in react_dict : H2O -> {H:2, O:1}
         for side in self.original_react:
             molecules = []
 
@@ -88,7 +93,7 @@ class Balancer:
         return self.get_answer() if res else 'I cant balance it!'
 
     def looper(self, n=0):
-        for i in range(self.max_k):
+        for _ in range(self.max_k):
             if n != len(self.k) - 1:
                 res = self.looper(n + 1)
 
