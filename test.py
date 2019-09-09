@@ -28,8 +28,6 @@ expected_outs = [
     "(NH2)2SO4 => 2NH2 + SO4",
     "(NH2)(HO) => NH2 + HO",
 
-    # "3FeSO4 + 2K3(Fe(CN)6) => Fe3(Fe(CN)6)2 + 3K2SO4"
-
     'I cant balance it!'
 ]
 
