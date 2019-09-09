@@ -1,6 +1,9 @@
 import re
-
-# TODO: add support for molecules that have (): Cu(NO3)2
+from collections import defaultdict
+"""
+in all the project:
+    'k' means 'coefficient'
+"""
 
 
 class Balancer:
@@ -14,7 +17,9 @@ class Balancer:
         self.original_react = self.init_react_formula(react_formula)
         self.custom_react = []
 
-        self.atoms_set = set()
+        self.atoms_set = {
+            *[atom for atom in re.findall(r"[A-Z][a-z]?", react_formula)]
+        }
 
     # According to the react, the k array splits
     @property
@@ -22,10 +27,9 @@ class Balancer:
         return [self.k[:self.splitter_i], self.k[self.splitter_i:]]
 
     # checks these items:
-    # - the react should have '=>'
+    # - the react formula should have '=>'
     # - invalid character checking
-    # - there are not any sub K that equal to 0
-    def react_formula_validation(self, react_formula: str):
+    def validate(self, react_formula: str):
         if '=>' not in react_formula:
             return False
 
@@ -33,25 +37,21 @@ class Balancer:
 
         for molecule in molecules:
             # check there is no invalid characters
-            molecule_match = re.match(r'([[A-Za-z0-9])+$', molecule)
+            molecule_match = re.match(r'([[A-Za-z0-9()])+$', molecule)
 
             if molecule_match[0] != molecule:
                 return False
-
-            # check all sub k in molecules not equal to 0
-            sub_k_list = re.findall(r"[A-Z][a-z]?([0-9]+)", molecule)
-            for sub_k in sub_k_list:
-                if int(sub_k) == 0:
-                    return False
 
         return True
 
     # converts "H2 + O2 => H2O" to [['H2', 'O2'], ['H2O']]
     def init_react_formula(self, react_formula: str):
-        validation = self.react_formula_validation(react_formula)
+        validation = self.validate(react_formula)
 
         if not validation:
             print("[Syntax Error]: the react formula is not correct")
+
+            # FIXME: throw an Exception
             return 'Error'
 
         react = react_formula.replace('+', ' ').split('=>')
@@ -60,23 +60,49 @@ class Balancer:
         return react
 
     # convert string molecules to dict in react_dict : H2O -> {H:2, O:1}
+    def molecule_to_dict(self, molecule: str, k=1) -> dict:
+        molecule_dict = {}
+
+        atoms = re.findall(r'[A-Z][a-z]?[0-9]*', molecule)
+
+        for atom in atoms:
+            name = re.search(r'[A-Z][a-z]?', atom)[0]
+
+            number = re.search(r'[0-9]+', atom)
+            number = int(number[0]) if number else 1
+
+            molecule_dict[name] = number * k
+
+        return molecule_dict
+
     def init_custom_react(self):
         for side in self.original_react:
             molecules = []
 
+            molecule: str
             for molecule in side:
-                molecule_dict = {}
-                atoms = re.findall(r'[A-Z][a-z]?[0-9]*', molecule)
+                molecule_dict = defaultdict(int)
 
-                for atom in atoms:
-                    name = re.search(r'[A-Z][a-z]?', atom)[0]
+                sub_molecules = re.finditer(
+                    r"(\([A-Za-z0-9]+\)(\d)+|[A-Za-z0-9]+)", molecule)
 
-                    self.atoms_set.add(name)
+                for sub_molecule in sub_molecules:
+                    sub_molecule_dict: dict
 
-                    number = re.search(r'[0-9]+', atom)
-                    number = int(number[0]) if number else 1
+                    # if the molecule has ()
+                    if '(' in sub_molecule.group():
+                        molecule_str, molecule_k = sub_molecule.groups()
 
-                    molecule_dict[name] = number
+                        sub_molecule_dict = self.molecule_to_dict(
+                            molecule_str, int(molecule_k))
+
+                    else:
+                        sub_molecule_dict = self.molecule_to_dict(
+                            sub_molecule.group())
+
+                    # add to others
+                    for atom, number in sub_molecule_dict.items():
+                        molecule_dict[atom] += number
 
                 molecules.append(molecule_dict)
 
@@ -148,6 +174,7 @@ class Balancer:
 
 def main():
     inp = input("enter your react: (Br2 + H2 => BrH)\n")
+    # inp = "Br2 + H2 => BrH"
 
     res = Balancer(inp).balance()
     print(res)
