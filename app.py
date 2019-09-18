@@ -212,8 +212,7 @@ class Balancer:
 
 
 def main():
-    # inp = input("enter your react: (Br2 + H2 => BrH)\n")
-    inp = "FeSO4 + K3(Fe(CN)6) => Fe3(Fe(CN)6)2 + K2SO4"
+    inp = input("enter your react: (Br2 + H2 => BrH)\n")
 
     res = Balancer(inp).balance()
     print(res)
