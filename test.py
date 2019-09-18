@@ -9,11 +9,10 @@ inputs = [
     "O2 => O3",
 
     "Fe2(SO4)3 => Fe + SO4",
-    "(NH2)2SO4 => NH2 + SO4",
-    "(NH2)(HO) => NH2 + HO",
+    "(NH4)2(HO)2 => NH4 + HO",
 
-    # Error
-    # "FeSO4 + K3(Fe(CN)6) => Fe3(Fe(CN)6)2 + K2SO4"
+    "FeSO4 + K3(Fe(CN)6) => Fe3(Fe(CN)6)2 + K2SO4",
+
 
     "A + B => C + D"
 ]
@@ -25,8 +24,9 @@ expected_outs = [
     "3O2 => 2O3",
 
     "Fe2(SO4)3 => 2Fe + 3SO4",
-    "(NH2)2SO4 => 2NH2 + SO4",
-    "(NH2)(HO) => NH2 + HO",
+    "(NH4)2(HO)2 => 2NH4 + 2HO",
+
+    "3FeSO4 + 2K3(Fe(CN)6) => Fe3(Fe(CN)6)2 + 3K2SO4",
 
     'I cant balance it!'
 ]

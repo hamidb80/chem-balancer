@@ -1,5 +1,9 @@
 import re
 from collections import defaultdict
+
+from typing import List, Dict
+from string import digits
+
 """
 in all the project:
     'k' means 'coefficient'
@@ -15,7 +19,7 @@ class Balancer:
         self.splitter_i = None
 
         self.original_react = self.init_react_formula(react_formula)
-        self.custom_react = []
+        self.custom_react = self.init_custom_react()
 
         self.atoms_set = {
             *[atom for atom in re.findall(r"[A-Z][a-z]?", react_formula)]
@@ -45,14 +49,11 @@ class Balancer:
         return True
 
     # converts "H2 + O2 => H2O" to [['H2', 'O2'], ['H2O']]
-    def init_react_formula(self, react_formula: str):
+    def init_react_formula(self, react_formula: str) -> List[List[str]]:
         validation = self.validate(react_formula)
 
         if not validation:
-            print("[Syntax Error]: the react formula is not correct")
-
-            # FIXME: throw an Exception
-            return 'Error'
+            raise Exception("[Syntax Error]: the react formula is not correct")
 
         react = react_formula.replace('+', ' ').split('=>')
         react = [side.split() for side in react]
@@ -60,57 +61,95 @@ class Balancer:
         return react
 
     # convert string molecules to dict in react_dict : H2O -> {H:2, O:1}
-    def molecule_to_dict(self, molecule: str, k=1) -> dict:
-        molecule_dict = {}
+    def init_custom_react(self) -> List[List[Dict[str, int]]]:
+        res = []
 
-        atoms = re.findall(r'[A-Z][a-z]?[0-9]*', molecule)
-
-        for atom in atoms:
-            name = re.search(r'[A-Z][a-z]?', atom)[0]
-
-            number = re.search(r'[0-9]+', atom)
-            number = int(number[0]) if number else 1
-
-            molecule_dict[name] = number * k
-
-        return molecule_dict
-
-    def init_custom_react(self):
         for side in self.original_react:
             molecules = []
 
             molecule: str
             for molecule in side:
-                molecule_dict = defaultdict(int)
-
-                sub_molecules = re.finditer(
-                    r"(\([A-Za-z0-9]+\)(\d)+|[A-Za-z0-9]+)", molecule)
-
-                for sub_molecule in sub_molecules:
-                    sub_molecule_dict: dict
-
-                    # if the molecule has ()
-                    if '(' in sub_molecule.group():
-                        molecule_str, molecule_k = sub_molecule.groups()
-
-                        sub_molecule_dict = self.molecule_to_dict(
-                            molecule_str, int(molecule_k))
-
-                    else:
-                        sub_molecule_dict = self.molecule_to_dict(
-                            sub_molecule.group())
-
-                    # add to others
-                    for atom, number in sub_molecule_dict.items():
-                        molecule_dict[atom] += number
-
+                molecule_dict = self.molecule_to_dict(molecule)
                 molecules.append(molecule_dict)
 
-            self.custom_react.append(molecules)
+            res.append(molecules)
+
+        return res
+
+    def molecule_to_dict(self, molecule: str, k=1) -> dict:
+        res = defaultdict(int)
+
+        sub_molecules_str = self.sepertate_molecule(molecule)
+
+        for sub_molecule_str in sub_molecules_str:
+            if '(' in sub_molecule_str:
+
+                last_close_par_i = sub_molecule_str.rfind(')')
+
+                molecule_str = sub_molecule_str[1:last_close_par_i]
+                molecule_k = sub_molecule_str[last_close_par_i + 1:] or '1'
+
+                atoms = self.molecule_to_dict(
+                    molecule_str, int(molecule_k) * k)
+
+                for atom, atom_k in atoms.items():
+                    res[atom] += atom_k
+
+            else:
+                atoms = re.findall(r"([A-Z][a-z]?)([0-9]*)", sub_molecule_str)
+
+                for atom_str, atom_k in atoms:
+                    atom_k = 1 if atom_k == '' else int(atom_k)
+
+                    res[atom_str] += atom_k * k
+
+        return res
+
+    def sepertate_molecule(self, molecule: str) -> List[str]:
+        res = []
+
+        open_par_i = -1
+        close_par_i = -2
+        pars_to_close = 0
+        last_pos = -1
+
+        for char_i, char in enumerate(molecule):
+            if char == '(':
+
+                if open_par_i == -1:
+
+                    if last_pos != char_i - 1:
+                        res.append(molecule[last_pos + 1:char_i])
+                        last_pos = char_i
+
+                    open_par_i = char_i
+
+                else:
+                    pars_to_close += 1
+
+            elif char == ')':
+
+                if pars_to_close == 0:
+                    res.append(molecule[open_par_i: char_i + 1])
+                    open_par_i = -1
+                    last_pos = char_i
+
+                    close_par_i = char_i
+
+                else:
+                    pars_to_close -= 1
+
+            elif char_i - 1 == close_par_i:
+                if char in digits:
+                    res[-1] += char
+                    close_par_i = char_i
+
+            elif char_i == len(molecule) - 1:
+                res.append(molecule[last_pos + 1:])
+
+        return res
 
     def balance(self):
-        self.init_custom_react()
-
         # init k
         self.k = [1] * len(self.original_react[0] + self.original_react[1])
         self.splitter_i = len(self.original_react[0])
@@ -133,7 +172,7 @@ class Balancer:
 
         self.k[n] = 1
 
-    def is_balanced(self):
+    def is_balanced(self) -> bool:
         splitted_k = self.splitted_k
 
         for atom in self.atoms_set:
@@ -152,7 +191,7 @@ class Balancer:
 
         return True
 
-    def get_answer(self):
+    def get_answer(self) -> str:
         splitted_k = self.splitted_k
 
         formula = [[], []]
@@ -173,8 +212,8 @@ class Balancer:
 
 
 def main():
-    inp = input("enter your react: (Br2 + H2 => BrH)\n")
-    # inp = "Br2 + H2 => BrH"
+    # inp = input("enter your react: (Br2 + H2 => BrH)\n")
+    inp = "FeSO4 + K3(Fe(CN)6) => Fe3(Fe(CN)6)2 + K2SO4"
 
     res = Balancer(inp).balance()
     print(res)
