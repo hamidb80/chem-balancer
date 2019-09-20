@@ -13,7 +13,6 @@ inputs = [
 
     "FeSO4 + K3(Fe(CN)6) => Fe3(Fe(CN)6)2 + K2SO4",
 
-
     "A + B => C + D"
 ]
 expected_outs = [
@@ -32,7 +31,7 @@ expected_outs = [
 ]
 
 
-def test_unit():
+def test_integrate():
     outs = []
 
     for inp in inputs:
@@ -43,4 +42,4 @@ def test_unit():
 
 
 if __name__ == "__main__":
-    test_unit()
+    test_integrate()

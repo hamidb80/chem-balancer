@@ -27,24 +27,25 @@ class Balancer:
 
     # According to the react, the k array splits
     @property
-    def splitted_k(self):
+    def splitted_k(self) -> List[List[int]]:
         return [self.k[:self.splitter_i], self.k[self.splitter_i:]]
 
     # checks these items:
     # - the react formula should have '=>'
     # - invalid character checking
-    def validate(self, react_formula: str):
+    # TODO: improve this
+    def validate(self, react_formula: str) -> bool:
         if '=>' not in react_formula:
             return False
 
-        molecules = react_formula.replace('+', '').replace('=>', '').split()
+        custom_react_formula = react_formula \
+            .replace('=>', '').replace('+', '').replace(' ', '')
 
-        for molecule in molecules:
-            # check there is no invalid characters
-            molecule_match = re.match(r'([[A-Za-z0-9()])+$', molecule)
+        invalid_char_match = re.findall(
+            r'[^A-Za-z0-9()]+', custom_react_formula)
 
-            if molecule_match[0] != molecule:
-                return False
+        if len(invalid_char_match) != 0:
+            return False
 
         return True
 
@@ -154,13 +155,15 @@ class Balancer:
         self.k = [1] * len(self.original_react[0] + self.original_react[1])
         self.splitter_i = len(self.original_react[0])
 
-        res = self.looper()
+        res = self.method1()
         return self.get_answer() if res else 'I cant balance it!'
 
-    def looper(self, n=0):
+    # balancing with moethod1
+    # balance with try method
+    def method1(self, n=0):
         for _ in range(self.max_k):
             if n != len(self.k) - 1:
-                res = self.looper(n + 1)
+                res = self.method1(n + 1)
 
                 if res:
                     return True
@@ -175,13 +178,16 @@ class Balancer:
     def is_balanced(self) -> bool:
         splitted_k = self.splitted_k
 
+        # check every atom is balanced
         for atom in self.atoms_set:
             res = [0, 0]
 
             for side_i in range(len(self.custom_react)):
                 for molecule_i, molecule in enumerate(self.custom_react[side_i]):
 
+                    # get k of atom if this atom exists in the molecule
                     atom_number = molecule.get(atom)
+
                     if atom_number:
                         res[side_i] += atom_number * \
                             splitted_k[side_i][molecule_i]
