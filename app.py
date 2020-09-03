@@ -1,9 +1,11 @@
 import re
 from collections import defaultdict
+from datetime import datetime
 
 from typing import List, Dict
 from string import digits
 
+dashes = '-' * 16
 """
 in all the project:
     'k' means 'coefficient'
@@ -11,7 +13,7 @@ in all the project:
 
 
 class Balancer:
-    def __init__(self, react_formula: str, max_k=20):
+    def __init__(self, react_formula: str, max_k=10):
         self.max_k = max_k
 
         self.k = []
@@ -33,7 +35,6 @@ class Balancer:
     # checks these items:
     # - the react formula should have '=>'
     # - invalid character checking
-    # TODO: improve this
     def validate(self, react_formula: str) -> bool:
         if '=>' not in react_formula:
             return False
@@ -158,7 +159,6 @@ class Balancer:
         res = self.method1()
         return self.get_answer() if res else 'I cant balance it!'
 
-    # balancing with moethod1
     # balance with try method
     def method1(self, n=0):
         for _ in range(self.max_k):
@@ -220,8 +220,12 @@ class Balancer:
 def main():
     inp = input("enter your react: (Br2 + H2 => BrH)\n")
 
+    before = datetime.now()
     res = Balancer(inp).balance()
-    print(res)
+    after = datetime.now()
+
+    print(dashes, res, dashes, sep = '\n')
+    print(f'finished in {after - before}')
 
 
 if __name__ == "__main__":
