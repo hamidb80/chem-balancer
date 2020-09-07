@@ -65,7 +65,10 @@ class Balancer:
 
         return react
 
-    # convert string molecules to dict in react_dict : H2O -> {H:2, O:1}
+    """
+    convert string molecules to dict in react_dict : H2O -> {H:2, O:1}
+    """
+
     def init_custom_react(self) -> List[List[Dict[str, int]]]:
         res = []
 
