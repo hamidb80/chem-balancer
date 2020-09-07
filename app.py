@@ -50,7 +50,10 @@ class Balancer:
 
         return True
 
-    # converts "H2 + O2 => H2O" to [['H2', 'O2'], ['H2O']]
+    """
+     converts "H2 + O2 => H2O" to [['H2', 'O2'], ['H2O']]
+    """
+
     def init_react_formula(self, react_formula: str) -> List[List[str]]:
         validation = self.validate(react_formula)
 
@@ -77,6 +80,10 @@ class Balancer:
             res.append(molecules)
 
         return res
+
+    """
+    "Al(NO3)3" => {'Al': 1, "N": 3, "O": 9}
+    """
 
     def molecule_to_dict(self, molecule: str, k=1) -> dict:
         res = defaultdict(int)
@@ -106,6 +113,10 @@ class Balancer:
                     res[atom_str] += atom_k * k
 
         return res
+
+    """
+    Al(NO3)3 => ['Al', '(NO3)3']
+    """
 
     def sepertate_molecule(self, molecule: str) -> List[str]:
         res = []
@@ -224,7 +235,7 @@ def main():
     res = Balancer(inp).balance()
     after = datetime.now()
 
-    print(dashes, res, dashes, sep = '\n')
+    print(dashes, res, dashes, sep='\n')
     print(f'finished in {after - before}')
 
 
