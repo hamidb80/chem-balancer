@@ -19,36 +19,19 @@ proc eqSolver*(eq: string) =
     parsedEq = equationParser eq
     atoms = atomsSet eq
 
-  var atomCountInEq: Table[string, array[2, seq[int]]]
+  var coeffMatrix: Table[string, seq[int]]
   for atom in atoms.items:
-    atomCountInEq[atom] = [newSeq[int](), newSeq[int]()]
-    for i in 0..<2:
+    coeffMatrix[atom] = newSeq[int]()
+    for (i, coeff) in [(0,1), (1, -1)].items:
       for molecule in parsedEq[i]:
         let num = molecule.getOrDefault(atom, 0)
-        atomCountInEq[atom][i].add num
+        coeffMatrix[atom].add num * coeff
 
-  echo atomCountInEq
-  # eq: "NaCl => Na + Cl"
-  # atomCountInEq:
-  # {
-  #   "Cl": [ @[1], @[0, 1] ],
-  #   "Na": [ @[1], @[1, 0] ]
-  # }
-
-
-  var matrix: Table[string, seq[int]]
-  for atom in atoms.items:
-    matrix[atom] = newSeq[int]()
-    for (i, coeff) in [(0,1), (1, -1)].items:
-      for n in atomCountInEq[atom][i].mapIt(it * coeff):
-        matrix[atom].add n
-
-  echo matrix
-  # {
+  echo coeffMatrix
+  # Na + Cl => NaCl
+  #  {
   #   "Cl": @[1, 0, -1]
-  #   "Na": @[1, -1, 0]
+  #   "Na": @[0, 1, -1]
   # }
-
-
 
 eqSolver "H2 + O2 => H2O"
