@@ -9,4 +9,5 @@ bin           = @["nim"]
 
 
 # Dependencies
-requires "nim >= 1.4.2", "npeg >= 0.24.1"
+requires "nim >= 1.4.2"
+requires "npeg >= 0.24.1"

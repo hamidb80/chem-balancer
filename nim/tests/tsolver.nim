@@ -1,6 +1,4 @@
-import 
-  unittest
-  
+import unittest
 import solver
 
 suite "solver":

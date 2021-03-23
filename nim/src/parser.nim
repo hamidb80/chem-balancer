@@ -23,7 +23,7 @@ func specialParseInt(snum: string): int =
 
 proc moleculeParser*(mstr: string): ElementsCount =
   const moleculeParserNpeg = peg("molecule", d: MPData):
-    atom <- Upper * *Lower
+    atom <- Upper * ?Lower
     element <- >atom * >*Digit:
       d.temp.inc $1, specialParseInt $2
 
@@ -45,7 +45,6 @@ proc moleculeParser*(mstr: string): ElementsCount =
 proc equationParser*(eq: string): ChemicalEquation =
   doAssert "=>" in eq, "the equation doesn't have '=>'"
   let eqSides = eq.replace(" ", "").split("=>")
- 
   doAssert eqSides[0].atomsSet == eqSides[1].atomsSet, "some atoms are not in the both sides"
 
   let res =

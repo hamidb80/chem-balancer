@@ -28,10 +28,13 @@ proc eqSolver*(eq: string) =
         coeffMatrix[atom].add num * coeff
 
   echo coeffMatrix
-  # Na + Cl => NaCl
-  #  {
-  #   "Cl": @[1, 0, -1]
-  #   "Na": @[0, 1, -1]
-  # }
+
+  when false:
+    "Na + Cl" => "NaCl"
+    {
+      "Na": [1, 0, -1],
+      "Cl": [0, 1, -1]
+    }
+
 
 eqSolver "H2 + O2 => H2O"
