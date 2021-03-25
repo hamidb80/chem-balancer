@@ -4,6 +4,9 @@ import
   sequtils
 import number
 
+# import random
+# randomize()
+
 type 
   List* = seq[SNumber]
   Matrix* = seq[List]
@@ -34,18 +37,21 @@ func `==`*(m1,m2: Matrix): bool=
   true
 
 func specialSort*(s: Matrix): Matrix=
-  # FIXME: in some special cases needs deeper check
   ## sort by matrix[i][i] is not 0
+  
+  # FIXME: in some special cases needs deeper check
+  # 1. check for duplicated row 
   var m = s
 
   for i in 0..<s.len:
     for row_i in 0..<m.len:
-      if m[row_i][i] != 0:
+      if i >= m[row_i].len or m[row_i][i] != 0:
         result.add m[row_i]
         m.del row_i
         break
 
 proc guassianSolveLinearAlgebra*(A: Matrix, b: List, isSorted = false): List=
+  # let id = rand 0..100
   ## solve n eq n unknowns with guassian method
   if A.len == 1:
     return
@@ -61,7 +67,7 @@ proc guassianSolveLinearAlgebra*(A: Matrix, b: List, isSorted = false): List=
     M = specialSort M
   
   var newb: List
-  for y in 0..<M.len:
+  for y in 0..<M.len: # extract sorted b(= new b) from M matrix 
     newb.add M[y].pop
 
   for y in 1..<M.len: # make up triangle matrix 
@@ -73,10 +79,7 @@ proc guassianSolveLinearAlgebra*(A: Matrix, b: List, isSorted = false): List=
     for i in 0..<answers.len:
       for x in 0..<M[y].len:
         M[y][x] -= answers[^(i+1)] * M[y - (i + 1)][x]
-    
-  for d in 0..<M.len: # check correctness 
-    doAssert M[d][0..<d].allIt it == 0
-
+  
   for d in 0..<M.len: # making the main diameter 1
     let k = M[d][d]
     for x in 0..<M[d].len:
@@ -85,13 +88,10 @@ proc guassianSolveLinearAlgebra*(A: Matrix, b: List, isSorted = false): List=
 
   # TODO: check is it possible to solve this or not
 
-  var knowns: List
-  for y in countdown(M.len - 1, 0):
+  for y in countdown(M.len - 1, 0): # knowns or vars : result
     let others = M[y][y+1..<M[y].len]
     var sum = newb[y]
     
-    for k in 0..<knowns.len:
-      sum -= others[k] * knowns[k]
-    knowns.insert sum, 0
-
-  knowns
+    for k in 0..<result.len:
+      sum -= others[k] * result[k]
+    result.insert sum, 0

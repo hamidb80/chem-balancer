@@ -33,7 +33,9 @@ proc eqSolver*(eq: string): seq[int] =
   let diff = coeffMatrix[0].len - coeffMatrix.len
   if diff > 1:
     raise newException(ValueError, "how is it even possible?!?") 
-  
+  elif diff < 0:
+    coeffMatrix = coeffMatrix[0..^(diff*(-1) + 1)]
+
   # assume the last unknown variable is 1
   coeffMatrix.add concat(repeat(0, coeffMatrix[0].len - 1), @[1])
   ans.add 1
