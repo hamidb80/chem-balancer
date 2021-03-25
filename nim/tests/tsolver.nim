@@ -1,36 +1,15 @@
 import unittest
-import solver, number, math2d
+import solver
 
-func convert(m: seq[seq[int]]): Matrix=
-  for y in 0..<m.len:
-    result.add newSeq[SNumber]()
-    for x in 0..<m[0].len:
-      result[^1].add initSNumber m[y][x]
+suite "equation balancer":
+  test "CH4 + O2 => CO2 + H2O":
+    check eqSolver("CH4 + O2 => CO2 + H2O") == @[1, 2, 1, 2]
 
-func convert(s: seq[int]): List=
-  for i in 0..<s.len:
-    result.add initSNumber s[i]
+  test "Al + Fe2O3 => Fe + Al2O3":
+    check eqSolver("Al + Fe2O3 => Fe + Al2O3") == @[2, 1, 2, 1]
 
+  test "O2 + H2 => H2O":
+    check eqSolver("O2 + H2 => H2O") == @[1, 2, 2]
 
-suite "solver":
-  test "sort by zeros":
-    check sortByZeros(toMatrix @[
-      @[0,2,0],
-      @[1,5,7],
-      @[1,4,0],
-      @[0,0,0]
-    ]) == toMatrix @[
-      @[1,5,7],
-      @[1,4,0],
-      @[0,2,0],
-      @[0,0,0]
-    ]
-  
-  test "solve linear algebra":
-    check solveLinearAlgebra(
-      @[
-        @[1,2],
-        @[3,4]
-      ].toMatrix,
-      @[4, 10].toList
-    ) == @[2, 1].toList
+  test "O2 => O3":
+    check eqSolver("O2 => O3") == @[3 ,2]

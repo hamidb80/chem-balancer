@@ -1,5 +1,4 @@
-import 
-  macros
+import macros
 
 func reverse[T](a:seq[T]): seq[T]=
   for i in countdown(a.high, a.low):
@@ -19,7 +18,6 @@ macro switchableArgs*(body: untyped): untyped=
   args.add ua.reverse
 
   newStmtList(body, bodyCopy)
-
 
 # func salam(a: char, b:float): bool {.switchableArgs.} = false
 # echo salam('1', 1.1)
