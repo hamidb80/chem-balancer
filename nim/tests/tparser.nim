@@ -16,6 +16,10 @@ suite "moleculeParser":
     check moleculeParser("(NH4)(NO3)") ==
       {"N": 2, "H": 4, "O": 3}.toTable
 
-suite "atomsSet":
-  test "He(NH4)2O2":
-    check "He(NH4)2O2".atomsSet == toHashSet(["He", "N", "H", "O"])
+  test "Fe2(SO4)3":
+    check moleculeParser("Fe2(SO4)3") ==
+      {"Fe": 2, "S": 3, "O": 12}.toTable
+
+# suite "atomsSet":
+  # test "He(NH4)2O2":
+  #   check "He(NH4)2O2".atomsSet == toHashSet(["He", "N", "H", "O"])
