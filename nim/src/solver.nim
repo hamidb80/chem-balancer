@@ -10,35 +10,45 @@ func hash(s: SNumber): Hash =
   hash s.up / s.down
 
 func devideByFirstNonZeroCell(l: List): List =
-  var k = 0
-  for c in l:
-    if c != 0:
-      k = c.toInt
-      break
+  for n in l:
+    if n != 0:
+      return l.mapIt it / n
 
-  l.mapIt it / k
+proc specialSort*(mat: Matrix): Matrix=
+  # remove duplicated rows e.g. [4,0 ,2] , [2, 0, 1]
+  result = (mat.mapIt it.devideByFirstNonZeroCell).toHashSet.toSeq
+  let minLen = min(result.len, result[0].len)
 
-func specialSort*(s: Matrix): Matrix =
-  var # remove duplicated rows e.g. [4,0 ,2] , [2, 0, 1]
-    m = (s.mapIt it.devideByFirstNonZeroCell).toHashSet.toSeq
-  
-  let org = m
-  debugEcho "org1~:\n", org
+  template foundThem(i,j: int):untyped=
+    swap result[i], result[j]
+    found = true
+    break search
 
-  for i in 0..<min(s.len, s[0].len): # sort by matrix[i][i] is not 0
+  for i in 0..<minLen: # sort by matrix[i][i] is not 0
     var found = false
     
-    for row_i in 0..<m.len:
-      if m[row_i][i] != 0:
-        result.add m[row_i]
-        m.del row_i
-        found = true
-        break
-    
+    block search:
+      for a in i..<result.len:
+        if result[a][i] != 0: # try to find a row
+          foundThem i, a
+        else: # try to replace with other rows
+          for b in 0..<i:
+            # [1,0,0,1]
+            # ...
+            # ...
+            # [1,2,1,0]
+            if result[b][i] != 0 and result[a][b] != 0:
+              foundThem a, b
+            else:
+              debugEcho "check ", a, " with ", b, " failed"
+              debugEcho result[b], i, " is ", result[b][i]
+              debugEcho result[a], b, " is ", result[a][b]
+              debugEcho "in mat \n", result
+
     if not found:
-      debugEcho "org2:\n", org
-      debugEcho "mod:\n", m
-      debugEcho "res:\n", result
+      debugEcho "for row ", i
+      debugEcho "in matrix \n", mat
+      debugEcho "res so far \n", result
       raise newException(ValueError, "is not solvable")
   
 func createCoeffMatrixFromEq*(parsedEq: ChemicalEquation): seq[seq[int]] =
@@ -50,33 +60,37 @@ func createCoeffMatrixFromEq*(parsedEq: ChemicalEquation): seq[seq[int]] =
         let num = molecule.getOrDefault(elem, 0)
         result[^1].add num * coeff
 
-  # coeffMatrix:
-  # "Al + Fe2O3 => Fe + Al2O3"
-  # {
-  #   "Al" [1, 0, 0, -2],
-  #   "Fe" [0, 2, -1, 0],
-  #   "O"  [0, 3, 0, -3]
-  # }
-
-
 proc eqSolver*(eq: string): seq[int] =
-  let
-    parsedEq = equationParser eq
-
+  let parsedEq = equationParser eq
   var
-    coeffMatrix: seq[seq[int]] = createCoeffMatrixFromEq(parsedEq)
-    ans: seq[int] = repeat(0, coeffMatrix[0].len - 1)
+    coeffMatrix = createCoeffMatrixFromEq(parsedEq).toMatrix
+    ans = repeat(0, coeffMatrix.len).toList
 
-  let diff = coeffMatrix[0].len - coeffMatrix.len
-  if diff > 1:
-    raise newException(ValueError, "how is it even possible?!?")
+  doAssert ans.len == coeffMatrix.len
 
-  # sort coeff Matrix
+  let diff = coeffMatrix.len - coeffMatrix[0].len
+  template cutUseless[T](list: var seq[T]): untyped=
+    # list = list.slice
+    discard
+
+  ans.cutUseless
+  coeffMatrix.cutUseless
+    
   # assume the last unknown variable is 1
-  coeffMatrix.add concat(repeat(0, coeffMatrix[0].len - 1), @[1])
-  ans.add 1
+  coeffMatrix.add concat(repeat(0\1, coeffMatrix[0].len - 1), @[1\1])
+  ans.add 1\1
+  # -------------
 
-  let pureCoeffs = guassianSolveLinearAlgebra(coeffMatrix.toMatrix, ans.toList)
+  for i in 0..<coeffMatrix.len:
+    coeffMatrix[i].add ans[i]
+
+  coeffMatrix = specialSort coeffMatrix
+
+  for i in 0..<coeffMatrix.len:
+    ans[i] = coeffMatrix[i].pop 
+  # -------------
+
+  let pureCoeffs = guassianSolveLinearAlgebra(coeffMatrix, ans)
   var commonLcm = pureCoeffs[0].down
   for i in 1..<pureCoeffs.len:
     commonLcm = lcm(commonLcm, pureCoeffs[i].down)

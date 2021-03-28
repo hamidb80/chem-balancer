@@ -4,20 +4,17 @@ import solver, parser, matrix, number
 func `~=`[T](a,b: seq[seq[T]]):bool=
   a.toHashSet == b.toHashSet
 
-template `\`(a, b: int): untyped=
-  initSNumber(a, b)
-
 suite "specialSort":
   test "m[i][i] is not zero":
-      check specialSort(toMatrix @[
-        @[0,0,3,0],
-        @[0,2,0,3],
-        @[1,5,7,3],
-      ]) == @[
-        @[1\1, 5\1, 7\1, 3\1],
-        @[0\1, 2\2, 0\2, 3\2],
-        @[0\1, 0\1, 1\1, 0\1]
-      ]
+    check specialSort(toMatrix @[
+      @[0,0,3,0],
+      @[0,2,0,3],
+      @[1,5,7,3],
+    ]) == @[
+      @[1\1, 5\1, 7\1, 3\1],
+      @[0\1, 2\2, 0\2, 3\2],
+      @[0\1, 0\1, 1\1, 0\1]
+    ]
 
   test "remove dupicated rows":
     check specialSort(toMatrix @[
@@ -48,7 +45,6 @@ suite "extract coeff matrix":
         @[0,6,-12,0]  # C
       ]
       
-
 
 suite "equation balancer":
   test "CH4 + O2 => CO2 + H2O":

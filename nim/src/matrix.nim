@@ -4,9 +4,6 @@ import
   sequtils
 import number
 
-# import random
-# randomize()
-
 type
   List* = seq[SNumber]
   Matrix* = seq[List]
@@ -40,6 +37,12 @@ func `==`*(m1, m2: Matrix): bool =
         return false
   true
 
+# FIXME add support for non square matrixes
+func transpose*(m: Matrix): Matrix=
+  result = m
+  for i in 0..<m.len:
+    for j in 0..<m[0].len:
+      result[i][j] = m[j][i]
 
 proc guassianSolveLinearAlgebra*(A: Matrix, b: List): List =
   ## solve n eq n unknowns with guassian method
@@ -55,30 +58,27 @@ proc guassianSolveLinearAlgebra*(A: Matrix, b: List): List =
 
   for y in 1..<M.len: # make top triangle matrix
     let answers = guassianSolveLinearAlgebra(
-      M[0..<y].mapIt it[0..<y],
+      transpose(M[0..<y].mapIt it[0..<y]),
       M[y][0..<y])
 
     for i in 0..<answers.len:
+      let k  = answers[^(i+1)]
       for x in 0..<M[y].len:
-        M[y][x] -= answers[^(i+1)] * M[y - (i + 1)][x]
+        M[y][x] -= k * M[y - (i + 1)][x]
+      newb[y] -= k * newb[y - (i + 1)]
 
-    for d in 0..<M.len: # making the main diameter 1
-      let k = M[d][d]
-      if k == 0: continue
+  for d in 0..<M.len: # making the main diameter 1
+    let k = M[d][d]
+    if k == 0: continue
+    
+    for x in 0..<M[d].len:
+      M[d][x] /= k
+    newb[d] /= k
 
-      for x in 0..<M[d].len:
-        M[d][x] /= k
-      try:
-        newb[d] /= k
-      except:
-        debugEcho "error Her"
-        echo d, newb, M
-
-  # TODO: check is it possible to solve this or not
-  for y in countdown(M.len - 1, 0): # knowns or vars : result
+  for y in countdown(M.len - 1, 0): # knowns
     let others = M[y][y+1..<M[y].len]
-    var sum = newb[y]
-
+    var ansCell = newb[y]
+    
     for k in 0..<result.len:
-      sum -= others[k] * result[k]
-    result.insert sum, 0
+      ansCell -= others[k] * result[k]
+    result.insert ansCell, 0

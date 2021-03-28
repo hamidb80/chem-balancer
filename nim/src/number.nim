@@ -2,23 +2,28 @@ import math, strformat
 import utils
 
 type
-  SNumber* = ref object # special integer number
+  SNumber* = object # special integer number
     up*: int
     down*: int
 
 func simplify*(n: SNumber): SNumber =
-  let k = gcd(n.up, n.down)
-
-  let coeff = if n.down < 0: -1 else: +1
+  let 
+    k = gcd(n.up, n.down)
+    coeff = if n.down < 0: -1 else: +1
 
   SNumber(
     up: (n.up div k) * coeff,
-    down: n.down div k * coeff
+    down: (n.down div k) * coeff
   )
 
 func initSNumber*(u: int = 0, d: int = 1): SNumber =
   doAssert d != 0
   simplify SNumber(up: u, down: d)
+
+
+template `\`*(a, b: int): untyped=
+  initSNumber(a, b)
+
 
 func `toInt`*(n: SNumber): int =
   if n.down != 1:
