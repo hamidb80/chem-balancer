@@ -33,22 +33,16 @@ proc specialSort*(mat: Matrix): Matrix=
           foundThem i, a
         else: # try to replace with other rows
           for b in 0..<i:
-            # [1,0,0,1]
-            # ...
-            # ...
-            # [1,2,1,0]
             if result[b][i] != 0 and result[a][b] != 0:
               foundThem a, b
-            else:
-              debugEcho "check ", a, " with ", b, " failed"
-              debugEcho result[b], i, " is ", result[b][i]
-              debugEcho result[a], b, " is ", result[a][b]
-              debugEcho "in mat \n", result
+
+            # FIXME: in row index 3 cannot find replacement
+            # [1, 0, (-1/2), 0]
+            # [1, (-2/5), (-1/10), 0]
+            # [0, 0, 1, 1]
+            # [1, (-1/2), 0, 0]
 
     if not found:
-      debugEcho "for row ", i
-      debugEcho "in matrix \n", mat
-      debugEcho "res so far \n", result
       raise newException(ValueError, "is not solvable")
   
 func createCoeffMatrixFromEq*(parsedEq: ChemicalEquation): seq[seq[int]] =
@@ -66,34 +60,36 @@ proc eqSolver*(eq: string): seq[int] =
     coeffMatrix = createCoeffMatrixFromEq(parsedEq).toMatrix
     ans = repeat(0, coeffMatrix.len).toList
 
-  doAssert ans.len == coeffMatrix.len
-
-  let diff = coeffMatrix.len - coeffMatrix[0].len
-  template cutUseless[T](list: var seq[T]): untyped=
-    # list = list.slice
-    discard
-
-  ans.cutUseless
-  coeffMatrix.cutUseless
-    
-  # assume the last unknown variable is 1
-  coeffMatrix.add concat(repeat(0\1, coeffMatrix[0].len - 1), @[1\1])
-  ans.add 1\1
-  # -------------
-
+  # --- sort
   for i in 0..<coeffMatrix.len:
     coeffMatrix[i].add ans[i]
 
   coeffMatrix = specialSort coeffMatrix
 
+  ans = @[].toList
   for i in 0..<coeffMatrix.len:
-    ans[i] = coeffMatrix[i].pop 
-  # -------------
+    ans.add coeffMatrix[i].pop 
 
-  let pureCoeffs = guassianSolveLinearAlgebra(coeffMatrix, ans)
-  var commonLcm = pureCoeffs[0].down
-  for i in 1..<pureCoeffs.len:
-    commonLcm = lcm(commonLcm, pureCoeffs[i].down)
+  let diff = coeffMatrix.len - coeffMatrix[0].len
+  # if diff > 0:
+  #   raise newException(ValueError, "What??")
+  if diff == 0:
+    discard coeffMatrix.pop
+    discard ans.pop
+  # assume the last unknown variable is 1
+  coeffMatrix.add concat(repeat(0\1, coeffMatrix[0].len - 1), @[1\1])
+  ans.add 1\1
+  
+  
+  # remove useless rows
+  # if coeffMatrix.len != coeffMatrix[0].len:
+  #   ans = ans[0..<coeffMatrix.len]
+  #   coeffMatrix = coeffMatrix[0..<coeffMatrix.len]
 
-  for n in pureCoeffs:
+  let ansCoeffs = guassianSolveLinearAlgebra(coeffMatrix, ans)
+  var commonLcm = ansCoeffs[0].down
+  for i in 1..<ansCoeffs.len:
+    commonLcm = lcm(commonLcm, ansCoeffs[i].down)
+
+  for n in ansCoeffs:
     result.add (commonLcm * n).toInt

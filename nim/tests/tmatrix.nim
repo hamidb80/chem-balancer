@@ -52,6 +52,19 @@ suite "solve linear algebra":
       @[5\1, 71\10, 49\10, 22\10]
     ) == @[1\2, 3\2, 1\1, 3\5]
 
+  test "5x5":
+    check guassianSolveLinearAlgebra(
+      @[
+        @[4,3,0,1,0],
+        @[1,0,6,5,6],
+        @[9,9,6,1,1],
+        @[0,1,1,4,0],
+        @[2,0,0,2,0]
+     ].toMatrix,
+      @[71\1, 45\1, 171\1, 31\3, 38\1]
+    ) == @[17\1, 1\3, 2\1, 2\1, 1\1]
+
+
 suite "functionalities":
   test "transpose":
     check transpose(
