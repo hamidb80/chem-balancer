@@ -21,7 +21,7 @@ to this:
 ```
 
 I used 2 approaches to solve the equation:
-1. **python**: it puts (1) coefficient for all parts of the equation and increate that number until 10
+1. **python**: it puts (1) coefficient for all parts of the equation and increase that number until 10
 ```
 1 + 1 => 1 + 1
 1 + 1 => 1 + 2
@@ -129,7 +129,7 @@ a + -d = 0 =(I)=> a = 1
 ```
 
 
-I gave you a simple example, but in some cases we need to remove dublicated row and sorting it in a special way
+I gave you a simple example, but in some cases we need to remove duplicated row and sorting it in a special way
 
 and also some times we don't want to loose the number of digits after float point, for this reason, I implemented a fractional number system that has it's own addition(+), subtraction(-), multipication(*) and division(/) which was quite fun for me.
 a fractional number would stores like this:
