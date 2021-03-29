@@ -86,7 +86,7 @@ the idea of the Guassion method is that we want to have something like this: [do
 [0  0  1  . | .]
 [0  0  0  1 | .]
 ```
-and we can achive this by doing simple algebra between rows nad swaping rows:
+and we can achive this by doing simple algebra between rows and swaping rows:
 ```
  a  b  c  d | ans
 [2  0 -1  0 | 0]
@@ -141,7 +141,7 @@ a fractional number would stores like this:
 ```
 
 * pros:
-  - it's very fast (unlike for a 9 parts equaiton it finds the coefficients before you even notice)
+  - it's very fast (unlike the first approach, for a 9 parts equaiton it finds the coefficients before you even notice)
   - it solves the equations for high coefficients number
 
 * cons:
