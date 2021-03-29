@@ -7,4 +7,4 @@ if isMainModule:
 
   let eq = stdin.readLine
 
-  eqSolver eq
+  echo eqSolver eq

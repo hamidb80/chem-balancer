@@ -2,7 +2,7 @@ import math, strformat
 import utils
 
 type
-  SNumber* = object # special integer number
+  SNumber* = object # special integer number | fractional number
     up*: int
     down*: int
 
@@ -20,16 +20,9 @@ func initSNumber*(u: int = 0, d: int = 1): SNumber =
   doAssert d != 0
   simplify SNumber(up: u, down: d)
 
-
 template `\`*(a, b: int): untyped=
   initSNumber(a, b)
 
-
-func `toInt`*(n: SNumber): int =
-  if n.down != 1:
-    raise newException(ValueError, "cannot convert float into int")
-
-  return n.up
 
 func commonDown*(a, b: var SNumber) =
   let downLcm = lcm(a.down, b.down)
@@ -40,6 +33,12 @@ func commonDown*(a, b: var SNumber) =
 
   makeup a
   makeup b
+
+func `toInt`*(n: SNumber): int =
+  if n.down != 1:
+    raise newException(ValueError, "cannot convert float into int")
+
+  return n.up
 
 func `$`*(n: SNumber): string =
   if n.up == 0 or n.down == 1:

@@ -28,7 +28,7 @@ proc moleculeParser*(mstr: string): ElementsCount =
     atom <- Upper * ?Lower
     element <- >atom * >*Digit:
       d.temp.inc $1, specialParseInt $2
-    
+        
     simpleMolecule <- +element | '(' * +element * ')' * >*Digit:
       let coeff =
         if capture.len == 2: specialParseInt $1
