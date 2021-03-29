@@ -23,13 +23,12 @@ func specialParseInt(snum: string): int =
   if snum == "": 1
   else: parseInt snum
 
-# TODO: add support for nested moleecules with depth more than 1
-# TODO: add support for charges
 proc moleculeParser*(mstr: string): ElementsCount =
   const moleculeParserNpeg = peg("molecule", d: MPData):
     atom <- Upper * ?Lower
     element <- >atom * >*Digit:
       d.temp.inc $1, specialParseInt $2
+    
     simpleMolecule <- +element | '(' * +element * ')' * >*Digit:
       let coeff =
         if capture.len == 2: specialParseInt $1
@@ -38,7 +37,19 @@ proc moleculeParser*(mstr: string): ElementsCount =
       for (e, n) in d.temp.pairs:
         d.finished.inc e, n * coeff
       d.temp.clear
-    molecule <- +simpleMolecule
+    
+    molecule <- >{'e', 'p'} | +simpleMolecule * ?(>{'+', '-'} * >*Digit):
+      
+      if capture.len == 2:
+        let charge = if $1 == "p": +1 else: -1
+        d.finished.inc "q", charge
+
+      elif capture.len == 3:
+        let
+          chargeKind = if $1 == "+": +1 else: -1
+          chargeNum = specialParseInt $2
+        
+        d.finished.inc "q", chargeNum * chargeKind
 
   var data: MPData
   doAssert moleculeParserNpeg.match(mstr, data).ok, fmt"'{mstr}' didn't matched"
@@ -49,6 +60,6 @@ proc equationParser*(eq: string): ChemicalEquation =
 
   let
     eqSides = eq.replace(" ", "").split("=>")
-    res = eqSides.mapIt (it.split "+").mapIt it.moleculeParser
+    res = eqSides.mapIt (it.split re"\+(?=[A-Z]|\()").mapIt it.moleculeParser
 
   [res[0], res[1]]
