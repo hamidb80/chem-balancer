@@ -7,6 +7,21 @@ this project consists of 2 parts:
 2. **Nim**:
    which is implemented based on Guassian method
 
+## Features:
+1. **Python**:
+  * nested molecule without limitation: Fe(Fe(CN)6)
+2. **Nim**:
+  * supports nested molecule with only 2 depth level: Fe(FeC6N6)
+  * supports ions: IO3- , Fe+2
+
+## Limitations:
+1. **Python**:
+  * can't balance chemical equations with balanced coefficients larger than 10
+  * balancing chemical equations with more than 7 parts may takes hours
+2. **Nim**:
+  * can't balance if there are not attending parts in equations[like Ag in this example]: NaCl + Ag => Na+ + Cl- + Ag
+
+
 ### Some information about the problem:
 first of all, we need to parse user entered equaiton
 
@@ -145,5 +160,5 @@ a fractional number would stores like this:
   - it solves the equations for high coefficients number
 
 * cons:
-  - it's harder to implement for a programmer
+  - it's harder to implement for programmer
 

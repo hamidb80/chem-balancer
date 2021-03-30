@@ -4,7 +4,8 @@ import solver, parser, matrix, number
 func `~=`[T](a,b: seq[seq[T]]):bool=
   a.toHashSet == b.toHashSet
 
-converter seqint2DToMatrix(a: seq[seq[int]]): Matrix= a.toMatrix
+converter seqint2DToMatrix(a: seq[seq[int]]): Matrix {.inline.}=
+  a.toMatrix
 
 suite "specialSort":
   test "m[i][i] is not zero":
