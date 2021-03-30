@@ -36,13 +36,8 @@ proc specialSort*(mat: Matrix): Matrix=
             if result[b][i] != 0 and result[a][b] != 0:
               foundThem a, b
 
-            # FIXME: in row index 3 cannot find replacement
-            # [1, 0, (-1/2), 0]
-            # [1, (-2/5), (-1/10), 0]
-            # [0, 0, 1, 1]
-            # [1, (-1/2), 0, 0]
-
     if not found:
+      # debugEcho result, "\n im in the row:", i
       raise newException(ValueError, "is not solvable")
   
 func createCoeffMatrixFromEq*(parsedEq: ChemicalEquation): seq[seq[int]] =

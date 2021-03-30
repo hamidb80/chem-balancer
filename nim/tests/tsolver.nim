@@ -4,9 +4,11 @@ import solver, parser, matrix, number
 func `~=`[T](a,b: seq[seq[T]]):bool=
   a.toHashSet == b.toHashSet
 
+converter seqint2DToMatrix(a: seq[seq[int]]): Matrix= a.toMatrix
+
 suite "specialSort":
   test "m[i][i] is not zero":
-    check specialSort(toMatrix @[
+    check specialSort(@[
       @[0,0,3,0],
       @[0,2,0,3],
       @[1,5,7,3],
@@ -17,7 +19,7 @@ suite "specialSort":
     ]
 
   test "remove dupicated rows":
-    check specialSort(toMatrix @[
+    check specialSort(@[
         @[1,1,-5,0], 
         @[1,0,0,-1], 
         @[4,0,0,-4], 
@@ -25,11 +27,38 @@ suite "specialSort":
         @[0,6,-12,0],
         @[0,6,-12,0]
       ]) ~= @[
-        @[1\1, 1\1, -5\1,  0\1], 
-        @[1\1, 0\1,  0\1, -1\1], 
-        @[0\1, 1\1,  0\1, -2\3], 
-        @[0\1, 1\1, -2\1,  0\1]
+        @[1, 1, -5,  0], 
+        @[1, 0,  0, -1], 
+        @[0, 1,  0, -2], 
+        @[0, 1, -2,  0]
       ]
+
+  test "order (1":
+    check specialSort(@[
+      @[1,  0, 2, 0],
+      @[1, -5, 7, 0],
+      @[0,  0, 1, 1],
+      @[1, -1, 0, 0]
+    ]) == (@[
+      @[1, -5, 7, 0],
+      @[1, -1, 0, 0],
+      @[1,  0, 2, 0],
+      @[0,  0, 1, 1]
+    ])
+
+
+  test "order (2":
+   check specialSort(@[
+      @[1, 1,  0, -2,  0],
+      @[1, 1, -1,  0,  0],
+      @[0, 0,  1,  0, -2],
+      @[0, 1,  0,  0,  4]
+    ]) == @[
+      @[1, 1, -1,  0,  0],
+      @[0, 0,  1,  0, -2],
+      @[1, 1,  0, -2,  0],
+      @[0, 1,  0,  0,  4]
+    ]
 
 
 suite "extract coeff matrix":
@@ -37,12 +66,12 @@ suite "extract coeff matrix":
     {.cast(gcsafe).}:
       let parsedEq = equationParser("FeSO4 + K3(FeC6N6) => Fe3(FeC6N6)2 + K2SO4")
       check createCoeffMatrixFromEq(parsedEq) ~= @[
-        @[1,1,-5,0],  # Fe
-        @[1,0,0,-1],  # S
-        @[4,0,0,-4],  # O
-        @[0,3,0,-2],  # K
-        @[0,6,-12,0], # N
-        @[0,6,-12,0]  # C
+        @[1,1, -5,  0],  # Fe
+        @[1,0,  0, -1],  # S
+        @[4,0,  0, -4],  # O
+        @[0,3,  0, -2],  # K
+        @[0,6, -12, 0], # N
+        @[0,6, -12, 0]  # C
       ]
       
 
@@ -67,6 +96,9 @@ suite "equation balancer":
   
   test "CaCl2 => Ca+2 + Cl-":
     check eqSolver("CaCl2 => Ca+2 + Cl-") == @[1, 1, 2]
+
+  test "I- + IO3- + H+ => I2 + H2O":
+    check eqSolver("I- + IO3- + H+ => I2 + H2O") == @[5,  1, 6, 3 ,3]
 
 # TODO add test for wrong eqs
   # add more tests
