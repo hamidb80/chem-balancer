@@ -9,11 +9,11 @@ type
 func simplify*(n: SNumber): SNumber =
   let 
     k = gcd(n.up, n.down)
-    coeff = if n.down < 0: -1 else: +1
+    sign = if n.down < 0: -1 else: +1
 
   SNumber(
-    up: (n.up div k) * coeff,
-    down: (n.down div k) * coeff
+    up: n.up div k * sign,
+    down: n.down div k * sign
   )
 
 func initSNumber*(u: int = 0, d: int = 1): SNumber =
@@ -27,16 +27,16 @@ template `\`*(a, b: int): untyped=
 func commonDown*(a, b: var SNumber) =
   let downLcm = lcm(a.down, b.down)
 
-  template makeup(a: var SNumber): untyped =
+  template doer(a: var SNumber): untyped =
     a.up = downLcm div a.down * a.up
     a.down = downLcm
 
-  makeup a
-  makeup b
+  doer a
+  doer b
 
 func `toInt`*(n: SNumber): int =
-  if n.down != 1:
-    raise newException(ValueError, "cannot convert float into int")
+  if n.up != 0 and n.down != 1:
+    raise newException(ValueError, "cannot convert float to int")
 
   return n.up
 
