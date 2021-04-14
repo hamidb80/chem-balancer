@@ -1,66 +1,97 @@
-import unittest, sets
+import
+  unittest, 
+  sets, sequtils
 import solver, parser, matrix, number
 
 func `~=`[T](a,b: seq[seq[T]]):bool=
   a.toHashSet == b.toHashSet
 
+func seqseqint2graph(a: seq[seq[int]]): seq[seq[bool]] {.inline.}=
+  a.mapIt(it.mapIt it != 0)
+
+func mainDiameterIsNot0(a: Matrix): bool=
+  for i in 0..<min(a.len, a[0].len):
+    if a[i][i] == 0:
+      return false
+  true
+
 converter seqint2DToMatrix(a: seq[seq[int]]): Matrix {.inline.}=
   a.toMatrix
 
+suite "dfs":
+  test "a path":
+    var graph = @[
+      @[1,1,1,0],
+      @[1,0,0,0],
+      @[1,0,0,1],
+      @[0,0,1,0],
+    ].seqseqint2graph
+
+    let res = dfs(graph, 0, 3)
+    check res == @[0,2,3]
+
+  test "no path":
+    var graph = @[
+      @[1,1,0,0],
+      @[1,0,0,0],
+      @[1,0,0,1],
+      @[0,0,1,0],
+    ].seqseqint2graph
+
+    let res = dfs(graph, 0, 3)
+    check res.len == 0
+
+
 suite "specialSort":
   test "m[i][i] is not zero":
-    check specialSort(@[
+    let res = specialSort(@[
       @[0,0,3,0],
       @[0,2,0,3],
       @[1,5,7,3],
-    ]) == @[
-      @[1\1, 5\1, 7\1, 3\1],
-      @[0\1, 2\2, 0\2, 3\2],
-      @[0\1, 0\1, 1\1, 0\1]
-    ]
+    ]) 
+    
+    check mainDiameterIsNot0 res
 
-  test "remove dupicated rows":
-    check specialSort(@[
+  test "remove dupicated & unnecesserrly rows":
+    let res = specialSort(@[
         @[1,1,-5,0], 
         @[1,0,0,-1], 
         @[4,0,0,-4], 
         @[0,3,0,-2], 
         @[0,6,-12,0],
         @[0,6,-12,0]
-      ]) ~= @[
-        @[1, 1, -5,  0], 
-        @[1, 0,  0, -1], 
-        @[0, 1,  0, -2], 
-        @[0, 1, -2,  0]
+      ])
+    
+    check:
+      res ~= @[
+        @[1\1, 1\1, -5\1,  0\1], 
+        @[1\1, 0\1,  0\1, -1\1], 
+        @[0\1, 1\1,  0\1, -2\3], 
+        @[0\1, 1\1, -2\1,  0\1]
       ]
+      mainDiameterIsNot0 res
+      res.len == 4
 
   test "order (1":
-    check specialSort(@[
+    let res = specialSort(@[
       @[1,  0, 2, 0],
       @[1, -5, 7, 0],
       @[0,  0, 1, 1],
       @[1, -1, 0, 0]
-    ]) == (@[
-      @[1, -5, 7, 0],
-      @[1, -1, 0, 0],
-      @[1,  0, 2, 0],
-      @[0,  0, 1, 1]
     ])
-
+    
+    check mainDiameterIsNot0 res
 
   test "order (2":
-   check specialSort(@[
+    let res =  specialSort(@[
       @[1, 1,  0, -2,  0],
       @[1, 1, -1,  0,  0],
       @[0, 0,  1,  0, -2],
       @[0, 1,  0,  0,  4]
-    ]) == @[
-      @[1, 1, -1,  0,  0],
-      @[0, 0,  1,  0, -2],
-      @[1, 1,  0, -2,  0],
-      @[0, 1,  0,  0,  4]
-    ]
-
+    ]) 
+    
+    check mainDiameterIsNot0 res
+    
 
 suite "extract coeff matrix":
   test "FeSO4 + K3(FeC6N6) => Fe3(FeC6N6)2 + K2SO4":
@@ -74,7 +105,6 @@ suite "extract coeff matrix":
         @[0,6, -12, 0], # N
         @[0,6, -12, 0]  # C
       ]
-      
 
 suite "equation balancer":
   test "O2 => O3":

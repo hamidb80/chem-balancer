@@ -1,7 +1,6 @@
 import
   tables,
-  sets,
-  hashes,
+  sets, hashes,
   math,
   sequtils
 import parser, matrix, number
@@ -14,32 +13,72 @@ func devideByFirstNonZeroCell(l: List): List =
     if n != 0:
       return l.mapIt it / n
 
-proc specialSort*(mat: Matrix): Matrix=
-  # remove duplicated rows e.g. [4,0 ,2] , [2, 0, 1]
+## grm : graph relation matrix
+## we want a path from a to b
+func dfs*(grm: var seq[seq[bool]], a, b: int, visited: seq[int] = @[]): seq[int] =
+  # block:
+  #   debugEcho "new func call"
+  #   debugEcho "visited: ", visited
+  #   for row in grm:
+  #     debugEcho row
+  #   debugEcho "checking for ", a, "->", b
+
+  template newVisited: untyped=
+    visited & a
+
+  for (i, v) in grm[a].pairs:
+    # debugEcho (i,v), grm[a]
+    if v:
+      if i == b:
+        # debugEcho "found them!", newVisited
+        return newVisited & b
+
+      elif i != a and i notin visited:
+        # debugEcho "checking for ", i, "->", b
+        let path = dfs(grm, i, b, newVisited)
+        if path.len != 0:
+          # debugEcho "found ", i, "->", b
+          return visited & path
+
+  # debugEcho "nothing for", a, "->", b
+
+proc specialSort*(mat: Matrix): Matrix =
+  # sort by matrix[i][i] is not 0
+  # # remove duplicated rows e.g. [4,0 ,2] , [2, 0, 1]
   result = (mat.mapIt it.devideByFirstNonZeroCell).toHashSet.toSeq
   let minLen = min(result.len, result[0].len)
 
-  template foundThem(i,j: int):untyped=
-    swap result[i], result[j]
-    found = true
-    break search
+  for i in 0..<minLen:
+    if result[i][i] != 0:
+      continue
 
-  for i in 0..<minLen: # sort by matrix[i][i] is not 0
-    var found = false
-    
-    block search:
-      for a in i..<result.len:
-        if result[a][i] != 0: # try to find a row
-          foundThem i, a
-        else: # try to replace with other rows
-          for b in 0..<i:
-            if result[b][i] != 0 and result[a][b] != 0:
-              foundThem a, b
+    # create a map graph from matrix
+    var graph: seq[seq[bool]]=  newSeqWith(result.len, newSeqWith(result[0].len, false))
+    for row in 0..<result.len:
+      for col in 0..<result[0].len:
+        graph[row][col] = result[row][col] != 0
 
-    if not found:
-      # debugEcho result, "\n im in the row:", i
+    # find nodes that have [i][i] != 0
+    var finalNodesIndexes: seq[int]
+    for v in 0..<graph.len:
+      if graph[v][i]:
+        finalNodesIndexes.add v
+
+    var finalPath: seq[int]
+    for fni in finalNodesIndexes:
+      let path = dfs(graph, i, fni)
+      if path.len != 0:
+        finalPath = path
+        break
+
+    if finalPath.len != 0:
+      for ri in finalPath: # ri: row index
+        swap result[i], result[ri]
+
+    else:
       raise newException(ValueError, "is not solvable")
-  
+
+
 func createCoeffMatrixFromEq*(parsedEq: ChemicalEquation): seq[seq[int]] =
   for elem in extractElements(parsedEq).items:
     result.add newSeq[int]()
@@ -63,7 +102,7 @@ proc eqSolver*(eq: string): seq[int] =
 
   ans = @[].toList
   for i in 0..<coeffMatrix.len:
-    ans.add coeffMatrix[i].pop 
+    ans.add coeffMatrix[i].pop
 
   let diff = coeffMatrix.len - coeffMatrix[0].len
   # if diff > 0:
@@ -74,8 +113,8 @@ proc eqSolver*(eq: string): seq[int] =
   # assume the last unknown variable is 1
   coeffMatrix.add concat(repeat(0\1, coeffMatrix[0].len - 1), @[1\1])
   ans.add 1\1
-  
-  
+
+
   # remove useless rows
   # if coeffMatrix.len != coeffMatrix[0].len:
   #   ans = ans[0..<coeffMatrix.len]
