@@ -12,40 +12,26 @@ func devideByFirstNonZeroCell(l: List): List =
   for n in l:
     if n != 0:
       return l.mapIt it / n
-
-## grm : graph relation matrix
-## we want a path from a to b
 func dfs*(grm: var seq[seq[bool]], a, b: int, visited: seq[int] = @[]): seq[int] =
-  # block:
-  #   debugEcho "new func call"
-  #   debugEcho "visited: ", visited
-  #   for row in grm:
-  #     debugEcho row
-  #   debugEcho "checking for ", a, "->", b
-
+  ## grm: graph relation matrix
+  ## the result would be a path from a to b | if there was no path, an empty seq returned
   template newVisited: untyped=
     visited & a
 
   for (i, v) in grm[a].pairs:
-    # debugEcho (i,v), grm[a]
     if v:
       if i == b:
-        # debugEcho "found them!", newVisited
         return newVisited & b
 
       elif i != a and i notin visited:
-        # debugEcho "checking for ", i, "->", b
         let path = dfs(grm, i, b, newVisited)
         if path.len != 0:
-          # debugEcho "found ", i, "->", b
           return visited & path
 
-  # debugEcho "nothing for", a, "->", b
 
 proc specialSort*(mat: Matrix): Matrix =
   # sort by matrix[i][i] is not 0
-  # # remove duplicated rows e.g. [4,0 ,2] , [2, 0, 1]
-  result = (mat.mapIt it.devideByFirstNonZeroCell).toHashSet.toSeq
+  result = (mat.mapIt it.devideByFirstNonZeroCell).toHashSet.toSeq # remove duplicated rows e.g. [4,0 ,2] , [2, 0, 1]
   let minLen = min(result.len, result[0].len)
 
   for i in 0..<minLen:
@@ -53,7 +39,7 @@ proc specialSort*(mat: Matrix): Matrix =
       continue
 
     # create a map graph from matrix
-    var graph: seq[seq[bool]]=  newSeqWith(result.len, newSeqWith(result[0].len, false))
+    var graph: seq[seq[bool]] = newSeqWith(result.len, newSeqWith(result[0].len, false))
     for row in 0..<result.len:
       for col in 0..<result[0].len:
         graph[row][col] = result[row][col] != 0

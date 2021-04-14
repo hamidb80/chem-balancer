@@ -106,30 +106,19 @@ suite "extract coeff matrix":
         @[0,6, -12, 0]  # C
       ]
 
+template testChem(eq:string, coeffs: seq[int]): untyped=
+  test eq:
+    check eqSolver(eq) == coeffs
+
 suite "equation balancer":
-  test "O2 => O3":
-    check eqSolver("O2 => O3") == @[3 ,2]
-
-  test "O2 + H2 => H2O":
-    check eqSolver("O2 + H2 => H2O") == @[1, 2, 2]
-
-  test "(NH4)2(HO)2 => NH4 + HO":
-    check eqSolver("(NH4)2(HO)2 => NH4 + HO") == @[1 ,2 ,2]
-
-  test "Al + Fe2O3 => Fe + Al2O3":
-    check eqSolver("Al + Fe2O3 => Fe + Al2O3") == @[2, 1, 2, 1]
-
-  test "FeSO4 + K3(FeC6N6) => Fe3(FeC6N6)2 + K2SO4":
-    check eqSolver("FeSO4 + K3(FeC6N6) => Fe3(FeC6N6)2 + K2SO4") == @[3, 2 ,1 ,3]
-
-  test "K4Fe(SCN)6 + K2Cr2O7 + H2SO4 => Fe2(SO4)3 + Cr2(SO4)3 + CO2 + H2O + K2SO4 + KNO3":
-    check eqSolver("K4Fe(SCN)6 + K2Cr2O7 + H2SO4 => Fe2(SO4)3 + Cr2(SO4)3 + CO2 + H2O + K2SO4 + KNO3") == @[6, 97 ,355 ,3, 97, 36, 355, 91, 36]
-  
-  test "CaCl2 => Ca+2 + Cl-":
-    check eqSolver("CaCl2 => Ca+2 + Cl-") == @[1, 1, 2]
-
-  test "I- + IO3- + H+ => I2 + H2O":
-    check eqSolver("I- + IO3- + H+ => I2 + H2O") == @[5,  1, 6, 3 ,3]
+  testChem "O2 => O3", @[3 ,2]
+  testChem "O2 + H2 => H2O", @[1, 2, 2]
+  testChem "(NH4)2(HO)2 => NH4 + HO", @[1 ,2 ,2]
+  testChem "Al + Fe2O3 => Fe + Al2O3", @[2, 1, 2, 1]
+  testChem "FeSO4 + K3(FeC6N6) => Fe3(FeC6N6)2 + K2SO4", @[3, 2 ,1 ,3]
+  testChem "K4Fe(SCN)6 + K2Cr2O7 + H2SO4 => Fe2(SO4)3 + Cr2(SO4)3 + CO2 + H2O + K2SO4 + KNO3", @[6, 97 ,355 ,3, 97, 36, 355, 91, 36]
+  testChem "CaCl2 => Ca+2 + Cl-", @[1, 1, 2]
+  testChem "I- + IO3- + H+ => I2 + H2O", @[5,  1, 6, 3 ,3]
 
 # TODO add test for wrong eqs
   # add more tests
