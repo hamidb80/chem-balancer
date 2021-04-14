@@ -39,10 +39,7 @@ proc specialSort*(mat: Matrix): Matrix =
       continue
 
     # create a map graph from matrix
-    var graph: seq[seq[bool]] = newSeqWith(result.len, newSeqWith(result[0].len, false))
-    for row in 0..<result.len:
-      for col in 0..<result[0].len:
-        graph[row][col] = result[row][col] != 0
+    var graph = result.mapIt it.mapIt it != 0
 
     # find nodes that have [i][i] != 0
     var finalNodesIndexes: seq[int]
@@ -97,7 +94,7 @@ proc eqSolver*(eq: string): seq[int] =
     discard coeffMatrix.pop
     discard ans.pop
   # assume the last unknown variable is 1
-  coeffMatrix.add concat(repeat(0\1, coeffMatrix[0].len - 1), @[1\1])
+  coeffMatrix.add repeat(0\1, coeffMatrix[0].len - 1) & 1\1
   ans.add 1\1
 
 
