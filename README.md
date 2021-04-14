@@ -144,9 +144,9 @@ a + -d = 0 =(I)=> a = 1
 ```
 
 
-I gave you a simple example, but in some cases we need to remove duplicated row and sorting it in a special way
+I gave you a simple example, but in some cases we need to remove duplicated row and sorting it in a special way. i used DFS algorithm for this case
 
-and also some times we don't want to loose the number of digits after float point, for this reason, I implemented a fractional number system that has it's own addition(+), subtraction(-), multipication(*) and division(/) which was quite fun for me.
+and also some times we don't want to loose the number of digits after float point, for this reason, I implemented a fractional number system that has it's own addition(+), subtraction(-), multipication(*) and division(/) functions, which implementing them was quite fun for me.
 a fractional number would stores like this:
 
 ```
@@ -161,4 +161,3 @@ a fractional number would stores like this:
 
 * cons:
   - it's harder to implement for programmer
-
