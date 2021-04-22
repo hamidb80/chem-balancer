@@ -14,7 +14,7 @@ func devideByFirstNonZeroCell(l: List): List =
       return l.mapIt it / n
 func dfs*(grm: var seq[seq[bool]], a, b: int, visited: seq[int] = @[]): seq[int] =
   ## grm: graph relation matrix
-  ## the result would be a path from a to b | if there was no path, an empty seq returned
+  ## the result would be a path from a to b | if there was no path, an empty seq is returned
   template newVisited: untyped=
     visited & a
 
@@ -33,7 +33,7 @@ proc specialSort*(mat: Matrix): Matrix =
   # sort by matrix[i][i] is not 0
   result = (mat.mapIt it.devideByFirstNonZeroCell).toHashSet.toSeq # remove duplicated rows e.g. [4,0 ,2] , [2, 0, 1]
   let minLen = min(result.len, result[0].len)
-
+ 
   for i in 0..<minLen:
     if result[i][i] != 0:
       continue
@@ -77,10 +77,8 @@ proc eqSolver*(eq: string): seq[int] =
     coeffMatrix = createCoeffMatrixFromEq(parsedEq).toMatrix
     ans = repeat(0, coeffMatrix.len).toList
 
-  # --- sort
   for i in 0..<coeffMatrix.len:
     coeffMatrix[i].add ans[i]
-
   coeffMatrix = specialSort coeffMatrix
 
   ans = @[].toList
@@ -93,15 +91,10 @@ proc eqSolver*(eq: string): seq[int] =
   if diff == 0:
     discard coeffMatrix.pop
     discard ans.pop
+  
   # assume the last unknown variable is 1
   coeffMatrix.add repeat(0\1, coeffMatrix[0].len - 1) & 1\1
   ans.add 1\1
-
-
-  # remove useless rows
-  # if coeffMatrix.len != coeffMatrix[0].len:
-  #   ans = ans[0..<coeffMatrix.len]
-  #   coeffMatrix = coeffMatrix[0..<coeffMatrix.len]
 
   let ansCoeffs = guassianSolveLinearAlgebra(coeffMatrix, ans)
   var commonLcm = ansCoeffs[0].down

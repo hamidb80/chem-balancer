@@ -14,7 +14,7 @@ type
     finished: ElementsCount
 
 func extractElements*(parsedEq: ChemicalEquation): HashSet[string] =
-  for side_i in 0..1:
+  for side_i in 0..<2:
     for molecule in parsedEq[side_i]:
       for elem in molecule.keys:
         result.incl elem
