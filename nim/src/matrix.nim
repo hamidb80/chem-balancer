@@ -37,16 +37,14 @@ func `==`*(m1, m2: Matrix): bool =
         return false
   true
 
-# FIXME add support for non square matrixes
-func transpose*(m: Matrix): Matrix=
-  result = m
+func transpose*(m: Matrix): Matrix =
+  result = newSeqWith(m[0].len, newSeqWith(m.len, 0\1))
   for i in 0..<m.len:
     for j in 0..<m[0].len:
       result[i][j] = m[j][i]
 
 proc guassianSolveLinearAlgebra*(A: Matrix, b: List): List =
   ## solve n eq n unknowns with guassian method
-  # let id = rand 0..100
   if A.len == 1:
     return
       if A[0][0] == 0: @[b[0]]
@@ -58,11 +56,11 @@ proc guassianSolveLinearAlgebra*(A: Matrix, b: List): List =
 
   for y in 1..<M.len: # make top triangle matrix
     let answers = guassianSolveLinearAlgebra(
-      transpose(M[0..<y].mapIt it[0..<y]),
+      transpose M[0..<y].mapIt it[0..<y],
       M[y][0..<y])
 
     for i in 0..<answers.len:
-      let k  = answers[^(i+1)]
+      let k = answers[^(i+1)]
       for x in 0..<M[y].len:
         M[y][x] -= k * M[y - (i + 1)][x]
       newb[y] -= k * newb[y - (i + 1)]
@@ -70,7 +68,7 @@ proc guassianSolveLinearAlgebra*(A: Matrix, b: List): List =
   for d in 0..<M.len: # making the main diameter 1
     let k = M[d][d]
     if k == 0: continue
-    
+
     for x in 0..<M[d].len:
       M[d][x] /= k
     newb[d] /= k
@@ -78,7 +76,7 @@ proc guassianSolveLinearAlgebra*(A: Matrix, b: List): List =
   for y in countdown(M.len - 1, 0): # knowns
     let others = M[y][y+1..<M[y].len]
     var ansCell = newb[y]
-    
+
     for k in 0..<result.len:
       ansCell -= others[k] * result[k]
     result.insert ansCell, 0

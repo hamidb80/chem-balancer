@@ -1,10 +1,5 @@
-import macros
+import macros, algorithm
 
-func reverse[T](a: seq[T]): seq[T] =
-  for i in countdown(a.high, a.low):
-    result.add a[i]
-
-# TODO: add test for it
 macro switchableArgs*(body: untyped): untyped =
   doAssert body.kind == nnkFuncDef or body.kind == nnkProcDef
 
@@ -16,7 +11,7 @@ macro switchableArgs*(body: untyped): untyped =
 
   let ua = args[startIndex..startIndex+1]
   args.del startIndex, 2
-  args.add ua.reverse
+  args.add reversed ua
 
   # echo treeRepr newStmtList(body, bodyCopy)
   newStmtList(body, bodyCopy)
