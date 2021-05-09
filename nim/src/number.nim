@@ -23,7 +23,6 @@ func initSNumber*(u: int = 0, d: int = 1): SNumber =
 template `\`*(a, b: int): untyped=
   initSNumber(a, b)
 
-
 func commonDown*(a, b: var SNumber) =
   let downLcm = lcm(a.down, b.down)
 
@@ -31,8 +30,7 @@ func commonDown*(a, b: var SNumber) =
     a.up = downLcm div a.down * a.up
     a.down = downLcm
 
-  doer a
-  doer b
+  doer a; doer b
 
 func `toInt`*(n: SNumber): int =
   if n.up != 0 and n.down != 1:

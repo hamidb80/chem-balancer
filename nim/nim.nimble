@@ -11,7 +11,10 @@ bin           = @["nim"]
 # Dependencies
 requires "nim >= 1.4.2"
 requires "npeg >= 0.24.1"
+requires "benchy >= 0.0.1"
 
+task build, "build app":
+  exec "nim c -d:release src/main.nim"
 
-task start, "run the app":
-  exec "nim r src/main.nim"
+task bench, "run benchmarks":
+  exec "nim r -d:release tests/bench.nim"
