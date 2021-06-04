@@ -15,3 +15,13 @@ macro switchableArgs*(body: untyped): untyped =
 
   # echo treeRepr newStmtList(body, bodyCopy)
   newStmtList(body, bodyCopy)
+
+
+template findIndexIt*(s:typed, pred:untyped): untyped =
+  var result: seq[int]
+
+  for (i, it {.inject.}) in s.pairs:
+    if pred:
+      result.add i
+
+  result 

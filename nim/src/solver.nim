@@ -3,7 +3,7 @@ import
   sets, hashes,
   math,
   sequtils
-import parser, matrix, number
+import parser, matrix, number, utils
 
 func hash(s: SNumber): Hash =
   hash s.up / s.down
@@ -41,14 +41,8 @@ proc specialSort*(mat: Matrix): Matrix =
     # create a map graph from matrix
     var graph = result.mapIt it.mapIt it != 0
 
-    # find nodes that have [i][i] != 0
-    var finalNodesIndexes: seq[int]
-    for v in 0..<graph.len:
-      if graph[v][i]:
-        finalNodesIndexes.add v
-
     var finalPath: seq[int]
-    for fni in finalNodesIndexes:
+    for fni in graph.findIndexIt( it[i] ): # node indexes [n] that have graph[n][i] != 0
       let path = dfs(graph, i, fni)
       if path.len != 0:
         finalPath = path
@@ -63,10 +57,10 @@ proc specialSort*(mat: Matrix): Matrix =
 
 
 func createCoeffMatrixFromEq*(parsedEq: ChemicalEquation): seq[seq[int]] =
-  for elem in extractElements(parsedEq).items:
+  for elem in extractElements(parsedEq):
     result.add newSeq[int]()
 
-    for (i, coeff) in [(0, 1), (1, -1)].items:
+    for (i, coeff) in [(0, 1), (1, -1)]:
       for molecule in parsedEq[i]:
         let num = molecule.getOrDefault(elem, 0)
         result[^1].add num * coeff
